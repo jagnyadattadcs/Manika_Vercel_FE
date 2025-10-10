@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Bike } from "lucide-react";
+import { Trophy } from "lucide-react";
 import CountdownTimer from "./CountdownTimer";
 import EmailForm from "./EmailForm.jsx";
 import Loader from "./Loader.jsx";
@@ -106,7 +106,7 @@ const ComingSoon = () => {
           {/* Title row with trophy and text */}
           <div className="flex items-center justify-center space-x-2 group">
             <div className="relative">
-              <Bike className="w-9 h-9 md:w-10 md:h-10 text-[#29fe1d] transition-transform duration-300 group-hover:scale-110" />
+              <Trophy className="w-9 h-9 md:w-10 md:h-10 text-[#29fe1d] transition-transform duration-300 group-hover:scale-110" />
               <div className="absolute inset-0 rounded-full blur-xl bg-[#29fe1d]/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
             <h1 className="text-1xl md:text-2xl lg:text-3xl font-extrabold tracking-wider bg-gradient-to-r from-white via-[#5fff50] to-[#29fe1d] bg-clip-text text-transparent">
@@ -133,6 +133,34 @@ const ComingSoon = () => {
           {/* <div className="max-w-md mx-auto">
             <EmailForm />
           </div> */}
+
+          {/* Contact Section */}
+          <div className="flex justify-center mt-8">
+            <div className="flex items-center gap-3 bg-[#111] text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-[#29fe1d]/40 hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-center bg-[#1a1a1a] p-2 rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6 text-[#29fe1d]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2 8.5C2 5.46 4.46 3 7.5 3h9A5.5 5.5 0 0122 8.5v7A5.5 5.5 0 0116.5 21h-9A5.5 5.5 0 012 15.5v-7zM8 10h8m-8 4h5"
+                  />
+                </svg>
+              </div>
+              <a
+                href="tel:+918968480646"
+                className="text-lg font-semibold tracking-wide hover:text-[#29fe1d] transition-colors duration-300"
+              >
+                +91 9439705550
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 

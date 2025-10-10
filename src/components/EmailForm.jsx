@@ -34,7 +34,7 @@ const EmailForm = () => {
         "your_service_id",   // replace with your EmailJS service ID
         "template_32dgvyy",  // replace with your template ID
         {
-          to_email: "info@kthsports.in", 
+          to_email: "info@manika.in", 
           from_email: email,
           message: "New subscription from website!",
         },
