@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import bg1 from "../assets/aboutus1.png"
+import bg1 from "../assets/Aboutus1.png"
 import Footer from '../components/Footer';
 import ChooseUs from '../components/ChooseUs';
 
