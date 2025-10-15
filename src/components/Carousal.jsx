@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const API_BASE_URL = "${import.meta.env.VITE_API_URL}";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}`;
 
 // Custom hook for localStorage
 const useLocalStorage = (key, defaultValue = null) => {

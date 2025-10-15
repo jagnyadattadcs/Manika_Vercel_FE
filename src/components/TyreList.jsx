@@ -8,7 +8,7 @@ const TyreList = () => {
   useEffect(() => {
     const fetchTyres = async () => {
       try {
-        const res = await fetch("${import.meta.env.VITE_API_URL}/tyres/get/top3");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/tyres/get/top3`);
         const data = await res.json();
         setTyres(data);
       } catch (error) {

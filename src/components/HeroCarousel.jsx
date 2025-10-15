@@ -721,7 +721,7 @@ const CAROUSEL_CONFIG = {
   style: { margin: 0, padding: 0, width: "100%", overflow: "hidden" },
 };
 
-const HeroCarousel = memo(({ apiBaseUrl = "${import.meta.env.VITE_API_URL}" }) => {
+const HeroCarousel = memo(({ apiBaseUrl = `${import.meta.env.VITE_API_URL}` }) => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

@@ -80,7 +80,7 @@ const ContactUs = () => {
     setStatus('');
 
     try {
-      const res = await axios.post('${import.meta.env.VITE_API_URL}/contact', form);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/contact`, form);
       setStatus(res.data.message);
       setSubmitType('success');
       setForm({ name: '', email: '', phone: '', message: '' });
@@ -99,7 +99,7 @@ const ContactUs = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('${import.meta.env.VITE_API_URL}/export-contacts', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/export-contacts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

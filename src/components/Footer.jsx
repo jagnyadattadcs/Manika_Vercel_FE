@@ -12,7 +12,7 @@ export default function Footer() {
      if (!mail) return;
 
      try {
-        const res = await axios.post('${import.meta.env.VITE_API_URL}/newsletter', { email: mail});
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/newsletter`, { email: mail});
         alert("subscribed successfully");
         setMail('');
      } catch (err) {

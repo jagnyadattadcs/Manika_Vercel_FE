@@ -119,7 +119,7 @@ const TyreDisplay = () => {
   const [showAllTyres, setShowAllTyres] = useState(false);
   const INITIAL_DISPLAY_COUNT = 8;
 
-  const API_BASE_URL = "${import.meta.env.VITE_API_URL}/tyres";
+  const API_BASE_URL = `${import.meta.env.VITE_API_URL}/tyres`;
 
   // API helper function
   const apiCall = async (method, url, data = null) => {
