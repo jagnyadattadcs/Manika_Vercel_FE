@@ -36,7 +36,7 @@ export default function Footer() {
           <h2 className="text-2xl md:text-3xl font-bold text-center md:text-left">
             Subscribe for latest <br className="block md:hidden" />
             update about <span className="text-black drop-shadow-md">MANIKA</span>{' '}
-            <span className="font-extrabold">Automobiles</span>
+            <span className="font-extrabold">Automobile</span>
           </h2>
           <div className="flex gap-2 w-full md:w-auto">
             <input

@@ -32,44 +32,44 @@ export default function ChooseUs() {
 
   const features = [
     {
+      icon: Sparkles,
+      title: "Premium Bike Selection",
+      description: "Choose from the latest models, classic favorites, and exclusive bikes. Every bike is showroom-ready and maintained to perfection.",
+      stats: "Top Brands",
+      highlight: "Showroom Quality",
+      color: "from-red-500 to-orange-500",
+      bgColor: "bg-orange-50",
+      shadowColor: "shadow-orange-500/30"
+    },
+    {
       icon: Users,
-      title: "Exceptional Customer Service",
-      description: "Our dedicated team of motorcycle enthusiasts provides personalized recommendations and comprehensive support throughout your entire rental experience with unmatched attention to detail.",
-      stats: "98% Satisfaction",
-      highlight: "Expert Staff",
-      color: "from-blue-500 to-blue-600",
+      title: "Expert Guidance",
+      description: "Our passionate bike experts help you find the perfect ride, explain features, and offer personalized advice for every enthusiast.",
+      stats: "5-Star Service",
+      highlight: "Bike Gurus",
+      color: "from-blue-500 to-purple-500",
       bgColor: "bg-blue-50",
       shadowColor: "shadow-blue-500/30"
     },
     {
-      icon: DollarSign,
-      title: "Competitive Pricing",
-      description: "Transparent pricing with absolutely no hidden fees, flexible rental packages, and exclusive discounts for extended rentals and returning customers who choose quality.",
-      stats: "Best Rates",
-      highlight: "No Hidden Fees",
-      color: "from-green-500 to-green-600",
+      icon: Star,
+      title: "Test Ride Experience",
+      description: "Enjoy a test ride before you buy. Feel the thrill, comfort, and style of your chosen bike in a safe, showroom environment.",
+      stats: "100+ Test Rides",
+      highlight: "Feel the Thrill",
+      color: "from-green-500 to-emerald-500",
       bgColor: "bg-green-50",
       shadowColor: "shadow-green-500/30"
     },
     {
       icon: Shield,
-      title: "Safety & Reliability",
-      description: "All motorcycles undergo rigorous safety inspections with comprehensive insurance coverage and 24/7 roadside assistance for complete peace of mind on every journey.",
-      stats: "100% Insured",
-      highlight: "Safety First",
-      color: "from-red-500 to-red-600",
-      bgColor: "bg-red-50",
-      shadowColor: "shadow-red-500/30"
-    },
-    {
-      icon: Clock,
-      title: "24/7 Support",
-      description: "Round-the-clock customer support and emergency assistance ensuring you're never alone on your journey, with instant response times day or night, anywhere you ride.",
-      stats: "Always Available",
-      highlight: "Instant Response",
-      color: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-50",
-      shadowColor: "shadow-purple-500/30"
+      title: "After-Sales Support",
+      description: "Comprehensive warranty, genuine parts, and dedicated service team. Your bike journey continues with our reliable support.",
+      stats: "Trusted Service",
+      highlight: "Warranty & Care",
+      color: "from-gray-700 to-gray-900",
+      bgColor: "bg-gray-100",
+      shadowColor: "shadow-gray-500/30"
     }
   ];
 
@@ -80,21 +80,19 @@ export default function ChooseUs() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         
-        {/* Premium Header */}
+        {/* Showroom Header */}
         <div className={`text-center mb-24 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="inline-flex items-center mb-8 bg-gradient-to-r from-red-100 via-orange-50 to-red-100 px-10 py-4 rounded-full shadow-2xl border border-red-200/50 backdrop-blur-sm">
-            <Sparkles className="w-6 h-6 text-red-600 mr-3 animate-pulse" />
-            <span className="text-red-700 font-black text-base tracking-widest uppercase">Why Choose Us</span>
-            <Sparkles className="w-6 h-6 text-red-600 ml-3 animate-pulse" />
+          <div className="inline-flex items-center mb-8 bg-gradient-to-r from-orange-100 via-red-50 to-orange-100 px-10 py-4 rounded-full shadow-2xl border border-orange-200/50 backdrop-blur-sm">
+            <Sparkles className="w-6 h-6 text-orange-500 mr-3 animate-pulse" />
+            <span className="text-orange-700 font-black text-base tracking-widest uppercase">Why Manika Automobile?</span>
+            <Sparkles className="w-6 h-6 text-orange-500 ml-3 animate-pulse" />
           </div>
-          
-          <h2 className="text-4xl lg:text-6xl font-black bg-gradient-to-r from-gray-900 via-red-600 to-gray-900 bg-clip-text text-transparent leading-tight mb-8 tracking-tight">
-            Unmatched Quality &<br />
-            <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Premium Excellence</span>
+          <h2 className="text-4xl lg:text-6xl font-black bg-gradient-to-r from-gray-900 via-orange-500 to-gray-900 bg-clip-text text-transparent leading-tight mb-8 tracking-tight">
+            The Ultimate Bike<br />
+            <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Showroom Experience</span>
           </h2>
-          
           <p className="text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed font-medium">
-            Experience the pinnacle of motorcycle rental service where quality, reliability, and customer satisfaction converge to create extraordinary journeys.
+            Discover the best bikes, expert advice, and a passion for riding—all under one roof. Your journey starts here!
           </p>
         </div>
 
@@ -177,36 +175,34 @@ export default function ChooseUs() {
           ))}
         </div>
 
-        {/* Premium CTA Section */}
+        {/* Showroom CTA Section */}
         <div className={`text-center transition-all duration-1000 ${ isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="bg-gradient-to-r from-gray-900 via-red-600 to-gray-900 rounded-3xl p-12 shadow-2xl border border-red-200/20 backdrop-blur-sm">
+          <div className="bg-gradient-to-r from-gray-900 via-orange-500 to-gray-900 rounded-3xl p-12 shadow-2xl border border-orange-200/20 backdrop-blur-sm">
             <h3 className="text-4xl font-bold text-white mb-6">
-              Ready to Experience Excellence?
+              Ready to Ride Your Dream Bike?
             </h3>
             <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-              Join thousands of satisfied customers who have chosen quality, reliability, and premium service.
+              Join hundreds of happy riders who found their perfect bike at Manika. Experience the difference today!
             </p>
-            
-            <button className="group inline-flex items-center bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-16 py-5 rounded-full font-bold text-xl shadow-2xl shadow-red-500/40 transition-all duration-300 hover:scale-105 hover:shadow-red-500/60 transform">
-              Start Your Journey
+            <button className="group inline-flex items-center bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-16 py-5 rounded-full font-bold text-xl shadow-2xl shadow-orange-500/40 transition-all duration-300 hover:scale-105 hover:shadow-orange-500/60 transform">
+              Book a Test Ride
               <ArrowRight className="ml-4 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
             </button>
-            
             {/* Trust Indicators */}
             <div className="flex justify-center items-center gap-8 mt-8 text-gray-300">
               <div className="flex items-center">
                 <Star className="w-5 h-5 text-yellow-400 fill-current mr-2" />
-                <span className="font-semibold">5.0 Rating</span>
+                <span className="font-semibold">Top Showroom</span>
               </div>
               <div className="w-px h-6 bg-gray-600"></div>
               <div className="flex items-center">
                 <CheckCircle className="w-5 h-5 text-green-400 mr-2" />
-                <span className="font-semibold">1000+ Happy Customers</span>
+                <span className="font-semibold">500+ Happy Riders</span>
               </div>
               <div className="w-px h-6 bg-gray-600"></div>
               <div className="flex items-center">
                 <Shield className="w-5 h-5 text-blue-400 mr-2" />
-                <span className="font-semibold">100% Secure</span>
+                <span className="font-semibold">Genuine Warranty</span>
               </div>
             </div>
           </div>
