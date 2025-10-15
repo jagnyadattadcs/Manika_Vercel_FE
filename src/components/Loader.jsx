@@ -22,7 +22,7 @@ const draw = keyframes`
 // Fill fade-in
 const fillIn = keyframes`
   from { fill: transparent; opacity: 0; }
-  to { fill: #29fe1d; opacity: 1; }
+  to { fill: #FF6400; opacity: 1; }
 `;
 
 const SvgText = styled.svg`
@@ -49,7 +49,7 @@ const StrokeText = styled.text`
   letter-spacing: 15px;
   font-family: Arial, Helvetica, sans-serif;
 
-  stroke: #29fe1d;
+  stroke: #FF6400;
   stroke-width: 3;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -82,7 +82,7 @@ const FillText = styled.text`
   letter-spacing: 15px;
   font-family: Arial, Helvetica, sans-serif;
 
-  fill: #29fe1d;
+  fill: #FF6400;
   opacity: 0;
   animation: ${fillIn} 0.8s ease forwards;
   animation-delay: 1.5s;
@@ -108,7 +108,7 @@ const Loader = () => {
       <SvgText viewBox="0 0 500 200" preserveAspectRatio="xMidYMid meet">
         {/* Fill Layer */}
         <FillText x="50%" y="60%" textAnchor="middle" dominantBaseline="middle">
-          Manika Automobiles
+          Manika Automobile
         </FillText>
 
         {/* Stroke Layer */}
@@ -118,7 +118,7 @@ const Loader = () => {
           textAnchor="middle"
           dominantBaseline="middle"
         >
-          Manika Automobiles
+          Manika Automobile
         </StrokeText>
       </SvgText>
     </Overlay>
