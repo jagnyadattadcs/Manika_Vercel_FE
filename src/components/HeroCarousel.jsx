@@ -28,11 +28,11 @@ const FALLBACK_SLIDES = [
   },
 ];
 
-// Custom hook for localStorage 
+// Custom hook for localStorage
 const useLocalStorage = (key, defaultValue = null) => {
   const [value, setValue] = useState(() => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
+      if (typeof window !== "undefined" && window.localStorage) {
         const item = localStorage.getItem(key);
         return item ? item : defaultValue;
       }
@@ -46,7 +46,7 @@ const useLocalStorage = (key, defaultValue = null) => {
   const setStoredValue = (newValue) => {
     try {
       setValue(newValue);
-      if (typeof window !== 'undefined' && window.localStorage) {
+      if (typeof window !== "undefined" && window.localStorage) {
         if (newValue === null) {
           localStorage.removeItem(key);
         } else {
@@ -72,20 +72,20 @@ const api = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching carousel data:', error);
+      console.error("Error fetching carousel data:", error);
       throw error;
     }
   },
-  
+
   updateCarouselItem: async (id, itemData, token, apiBaseUrl) => {
     try {
       const response = await fetch(`${apiBaseUrl}/carousal/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(itemData)
+        body: JSON.stringify(itemData),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -93,20 +93,20 @@ const api = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error updating carousel item:', error);
+      console.error("Error updating carousel item:", error);
       throw error;
     }
   },
-  
+
   createCarouselItem: async (itemData, token, apiBaseUrl) => {
     try {
       const response = await fetch(`${apiBaseUrl}/carousal`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(itemData)
+        body: JSON.stringify(itemData),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -114,18 +114,18 @@ const api = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error creating carousel item:', error);
+      console.error("Error creating carousel item:", error);
       throw error;
     }
   },
-  
+
   deleteCarouselItem: async (id, token, apiBaseUrl) => {
     try {
       const response = await fetch(`${apiBaseUrl}/carousal/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -133,45 +133,105 @@ const api = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error deleting carousel item:', error);
+      console.error("Error deleting carousel item:", error);
       throw error;
     }
+  },
+};
+
+// Upload helper: direct unsigned Cloudinary upload (returns secure_url)
+const uploadToCloudinary = async (file) => {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  if (!cloudName || !uploadPreset) {
+    throw new Error(
+      "Cloudinary env vars missing (VITE_CLOUDINARY_CLOUD_NAME / VITE_CLOUDINARY_UPLOAD_PRESET)"
+    );
   }
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("upload_preset", uploadPreset);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    {
+      method: "POST",
+      body: form,
+    }
+  );
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Cloudinary upload failed: ${res.status} ${txt}`);
+  }
+
+  const json = await res.json();
+  return json.secure_url;
 };
 
 // Edit Modal Component with enhanced UI
 const EditModal = ({ slide, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    subtitle: '',
-    description: '',
-    image: ''
+    title: "",
+    subtitle: "",
+    description: "",
+    image: "", // will hold final image URL
   });
+  const [imageFile, setImageFile] = useState(null); // optional File selected by admin
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (slide) {
       setFormData({
-        title: slide.title || '',
-        subtitle: slide.subtitle || '',
-        description: slide.description || '',
-        image: slide.image || ''
+        title: slide.title || "",
+        subtitle: slide.subtitle || "",
+        description: slide.description || "",
+        image: slide.image || "",
       });
+      setImageFile(null);
     } else {
       setFormData({
-        title: '',
-        subtitle: '',
-        description: '',
-        image: ''
+        title: "",
+        subtitle: "",
+        description: "",
+        image: "",
       });
+      setImageFile(null);
     }
   }, [slide]);
 
   const handleSubmit = () => {
-    if (!formData.title || !formData.subtitle || !formData.description || !formData.image) {
-      alert('Please fill in all fields');
-      return;
-    }
-    onSave(formData);
+    const doSave = async () => {
+      try {
+        setUploading(true);
+        let finalImageUrl = formData.image;
+        // If admin selected a file, upload it to Cloudinary first
+        if (imageFile) {
+          finalImageUrl = await uploadToCloudinary(imageFile);
+        }
+
+        if (
+          !formData.title ||
+          !formData.subtitle ||
+          !formData.description ||
+          !finalImageUrl
+        ) {
+          alert("Please fill in all fields and ensure an image is provided");
+          setUploading(false);
+          return;
+        }
+
+        await onSave({ ...formData, image: finalImageUrl });
+      } catch (err) {
+        console.error("Save failed:", err);
+        alert("Image upload or save failed. See console for details.");
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    doSave();
   };
 
   if (!isOpen) return null;
@@ -181,7 +241,7 @@ const EditModal = ({ slide, isOpen, onClose, onSave }) => {
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-700 animate-slideUp">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-            {slide ? 'Edit Carousel Slide' : 'Add New Slide'}
+            {slide ? "Edit Carousel Slide" : "Add New Slide"}
           </h2>
           <button
             onClick={onClose}
@@ -190,7 +250,7 @@ const EditModal = ({ slide, isOpen, onClose, onSave }) => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-semibold text-gray-300 mb-2">
@@ -199,12 +259,14 @@ const EditModal = ({ slide, isOpen, onClose, onSave }) => {
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
               placeholder="Enter slide title"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-semibold text-gray-300 mb-2">
               Subtitle
@@ -212,25 +274,29 @@ const EditModal = ({ slide, isOpen, onClose, onSave }) => {
             <input
               type="text"
               value={formData.subtitle}
-              onChange={(e) => setFormData({...formData, subtitle: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, subtitle: e.target.value })
+              }
               className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
               placeholder="Enter slide subtitle"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-semibold text-gray-300 mb-2">
               Description
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               rows={3}
               className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
               placeholder="Enter slide description"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-semibold text-gray-300 mb-2">
               Image URL
@@ -238,19 +304,50 @@ const EditModal = ({ slide, isOpen, onClose, onSave }) => {
             <input
               type="url"
               value={formData.image}
-              onChange={(e) => setFormData({...formData, image: e.target.value})}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-              placeholder="https://example.com/image.jpg"
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all mb-2"
+              placeholder="Or enter image URL (optional if uploading file)"
             />
+
+            <label className="block text-sm font-semibold text-gray-300 mb-2 mt-2">
+              Or Upload Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = (e.target.files && e.target.files[0]) || null;
+                setImageFile(f);
+                if (f) {
+                  // show preview via temporary object URL if no URL provided
+                  setFormData((prev) => ({
+                    ...prev,
+                    image: prev.image || URL.createObjectURL(f),
+                  }));
+                }
+              }}
+              className="w-full text-sm text-gray-300"
+            />
+            {imageFile && (
+              <div className="mt-3">
+                <img
+                  src={URL.createObjectURL(imageFile)}
+                  alt="preview"
+                  className="w-full h-36 object-cover rounded-md border"
+                />
+              </div>
+            )}
           </div>
-          
+
           <div className="flex space-x-3 pt-4">
             <button
               onClick={handleSubmit}
               className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-4 rounded-xl hover:from-orange-600 hover:to-red-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-orange-500/50 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center"
             >
               <Save className="w-4 h-4 mr-2" />
-              Save Changes
+              {uploading ? "Uploading..." : "Save Changes"}
             </button>
             <button
               onClick={onClose}
@@ -267,14 +364,22 @@ const EditModal = ({ slide, isOpen, onClose, onSave }) => {
 
 const AnimatedParticles = memo(() => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-orange-400 rounded-full opacity-40 animate-float" 
-         style={{ animationDuration: '6s', animationDelay: '0s' }} />
-    <div className="absolute top-3/4 right-1/4 w-2 h-2 bg-red-400 rounded-full opacity-50 animate-float"
-         style={{ animationDuration: '8s', animationDelay: '1s' }} />
-    <div className="absolute top-1/2 left-1/6 w-2 h-2 bg-yellow-300 rounded-full opacity-30 animate-float"
-         style={{ animationDuration: '7s', animationDelay: '2s' }} />
-    <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-pink-400 rounded-full opacity-35 animate-float"
-         style={{ animationDuration: '9s', animationDelay: '1.5s' }} />
+    <div
+      className="absolute top-1/4 left-1/4 w-3 h-3 bg-orange-400 rounded-full opacity-40 animate-float"
+      style={{ animationDuration: "6s", animationDelay: "0s" }}
+    />
+    <div
+      className="absolute top-3/4 right-1/4 w-2 h-2 bg-red-400 rounded-full opacity-50 animate-float"
+      style={{ animationDuration: "8s", animationDelay: "1s" }}
+    />
+    <div
+      className="absolute top-1/2 left-1/6 w-2 h-2 bg-yellow-300 rounded-full opacity-30 animate-float"
+      style={{ animationDuration: "7s", animationDelay: "2s" }}
+    />
+    <div
+      className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-pink-400 rounded-full opacity-35 animate-float"
+      style={{ animationDuration: "9s", animationDelay: "1.5s" }}
+    />
   </div>
 ));
 
@@ -284,8 +389,10 @@ AnimatedParticles.displayName = "AnimatedParticles";
 const DecorativeElements = memo(() => (
   <>
     <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-pulse" />
-    <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-red-500/60 to-transparent animate-pulse" 
-         style={{ animationDelay: '1s' }} />
+    <div
+      className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-red-500/60 to-transparent animate-pulse"
+      style={{ animationDelay: "1s" }}
+    />
     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
     <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
   </>
@@ -300,8 +407,10 @@ const LoadingSlide = memo(() => (
       <div className="text-center text-white space-y-6 animate-fadeIn">
         <div className="relative">
           <div className="w-20 h-20 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto"></div>
-          <div className="w-20 h-20 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin-reverse mx-auto absolute top-0 left-1/2 -translate-x-1/2" 
-               style={{ animationDelay: '0.3s' }}></div>
+          <div
+            className="w-20 h-20 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin-reverse mx-auto absolute top-0 left-1/2 -translate-x-1/2"
+            style={{ animationDelay: "0.3s" }}
+          ></div>
         </div>
         <div className="space-y-2">
           <p className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
@@ -346,96 +455,104 @@ const ErrorSlide = memo(({ onRetry }) => (
 ErrorSlide.displayName = "ErrorSlide";
 
 // Enhanced slide component with modern design
-const CarouselSlide = memo(({ slide, index, isAdmin, onEdit, onDelete }) => (
-  <div
-    key={slide._id}
-    className="relative h-[100vh] max-h-[800px] min-h-[600px] w-full overflow-hidden"
-  >
-    {/* Background Image with parallax effect */}
-    <div className="absolute inset-0 overflow-hidden w-full">
-      <img
-        src={`public/images/bikes/${slide.image}`}
-        alt={`${slide.title} - ${slide.subtitle}`}
-        className="w-full h-full object-cover transform scale-105 transition-transform duration-[12000ms] ease-out hover:scale-110"
-        loading={index === 0 ? "eager" : "lazy"}
-      />
-    </div>
+const CarouselSlide = memo(({ slide, index, isAdmin, onEdit, onDelete }) => {
+  // compute correct image src: allow full URLs (cloudinary) or public/images fallback
+  const imageSrc =
+    slide?.image && (slide.image.startsWith("http://") || slide.image.startsWith("https://"))
+      ? slide.image
+      : `/images/bikes/${slide?.image || ""}`;
 
-    {/* Modern Gradient Overlay */}
-    <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-transparent" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
-
-    {/* Admin Edit Controls with enhanced styling */}
-    {isAdmin && (
-      <div className="absolute top-6 left-6 z-20 flex space-x-3">
-        <button
-          onClick={() => onEdit(slide)}
-          className="group bg-blue-600/90 backdrop-blur-md text-white p-3 rounded-xl shadow-xl hover:bg-blue-500 transition-all duration-200 border border-blue-400/30 hover:scale-110 active:scale-95"
-          title="Edit Slide"
-        >
-          <Edit className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-        </button>
-        <button
-          onClick={() => onDelete(slide)}
-          className="group bg-red-600/90 backdrop-blur-md text-white p-3 rounded-xl shadow-xl hover:bg-red-500 transition-all duration-200 border border-red-400/30 hover:scale-110 active:scale-95"
-          title="Delete Slide"
-        >
-          <Trash2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-        </button>
+  return (
+    <div
+      key={slide._id}
+      className="relative h-[100vh] max-h-[800px] min-h-[600px] w-full overflow-hidden"
+    >
+      {/* Background Image with parallax effect */}
+      <div className="absolute inset-0 overflow-hidden w-full">
+        <img
+          src={imageSrc}
+          alt={`${slide.title} - ${slide.subtitle}`}
+          className="w-full h-full object-cover transform scale-105 transition-transform duration-[12000ms] ease-out hover:scale-110"
+          loading={index === 0 ? "eager" : "lazy"}
+        />
       </div>
-    )}
 
-    {/* Animated Particles */}
-    <AnimatedParticles />
+      {/* Modern Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
 
-    {/* Enhanced Content */}
-    <div className="absolute inset-0 flex items-center justify-center px-6 sm:px-8 text-center text-white w-full">
-      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 w-full">
-        {/* Main Title with modern styling */}
-        <div className="overflow-hidden w-full">
-          <div className="opacity-0 animate-slide-up space-y-3">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight">
-              <span className="block bg-gradient-to-r from-white via-orange-100 to-orange-200 bg-clip-text text-transparent drop-shadow-2xl">
-                {slide.title}
-              </span>
-            </h2>
-            <div className="flex items-center justify-center space-x-4">
-              <div className="h-px w-12 bg-gradient-to-r from-transparent to-orange-500"></div>
-              <span className="text-xl sm:text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent font-bold tracking-wide drop-shadow-xl">
-                {slide.subtitle}
-              </span>
-              <div className="h-px w-12 bg-gradient-to-l from-transparent to-orange-500"></div>
-            </div>
-          </div>
+      {/* Admin Edit Controls with enhanced styling */}
+      {isAdmin && (
+        <div className="absolute top-6 left-6 z-20 flex space-x-3">
+          <button
+            onClick={() => onEdit(slide)}
+            className="group bg-blue-600/90 backdrop-blur-md text-white p-3 rounded-xl shadow-xl hover:bg-blue-500 transition-all duration-200 border border-blue-400/30 hover:scale-110 active:scale-95"
+            title="Edit Slide"
+          >
+            <Edit className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+          </button>
+          <button
+            onClick={() => onDelete(slide)}
+            className="group bg-red-600/90 backdrop-blur-md text-white p-3 rounded-xl shadow-xl hover:bg-red-500 transition-all duration-200 border border-red-400/30 hover:scale-110 active:scale-95"
+            title="Delete Slide"
+          >
+            <Trash2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+          </button>
         </div>
+      )}
 
-        {/* Description with enhanced styling */}
-        {slide.description && (
+      {/* Animated Particles */}
+      <AnimatedParticles />
+
+      {/* Enhanced Content */}
+      <div className="absolute inset-0 flex items-center justify-center px-6 sm:px-8 text-center text-white w-full">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 w-full">
+          {/* Main Title with modern styling */}
           <div className="overflow-hidden w-full">
-            <div className="max-w-3xl mx-auto opacity-0 animate-slide-left">
-              <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl px-8 py-6 shadow-2xl">
-                <p className="text-lg sm:text-xl md:text-2xl text-gray-100 font-light leading-relaxed drop-shadow-lg">
-                  {slide.description}
-                </p>
+            <div className="opacity-0 animate-slide-up space-y-3">
+              <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight">
+                <span className="block bg-gradient-to-r from-white via-orange-100 to-orange-200 bg-clip-text text-transparent drop-shadow-2xl">
+                  {slide.title}
+                </span>
+              </h2>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="h-px w-12 bg-gradient-to-r from-transparent to-orange-500"></div>
+                <span className="text-xl sm:text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent font-bold tracking-wide drop-shadow-xl">
+                  {slide.subtitle}
+                </span>
+                <div className="h-px w-12 bg-gradient-to-l from-transparent to-orange-500"></div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Call to action hint */}
-        <div className="opacity-0 animate-fade-in-delayed">
-          <div className="inline-flex items-center space-x-2 text-sm text-gray-300 bg-white/5 backdrop-blur-sm px-6 py-3 rounded-full border border-white/10">
-            <span>Swipe to explore more</span>
-            <span className="animate-pulse">→</span>
+          {/* Description with enhanced styling */}
+          {slide.description && (
+            <div className="overflow-hidden w-full">
+              <div className="max-w-3xl mx-auto opacity-0 animate-slide-left">
+                <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl px-8 py-6 shadow-2xl">
+                  <p className="text-lg sm:text-xl md:text-2xl text-gray-100 font-light leading-relaxed drop-shadow-lg">
+                    {slide.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Call to action hint */}
+          <div className="opacity-0 animate-fade-in-delayed">
+            <div className="inline-flex items-center space-x-2 text-sm text-gray-300 bg-white/5 backdrop-blur-sm px-6 py-3 rounded-full border border-white/10">
+              <span>Swipe to explore more</span>
+              <span className="animate-pulse">→</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Decorative Elements */}
-    <DecorativeElements />
-  </div>
-));
+      {/* Decorative Elements */}
+      <DecorativeElements />
+    </div>
+  );
+});
 
 CarouselSlide.displayName = "CarouselSlide";
 
@@ -721,13 +838,13 @@ const CAROUSEL_CONFIG = {
   style: { margin: 0, padding: 0, width: "100%", overflow: "hidden" },
 };
 
-const HeroCarousel = memo(({ apiBaseUrl = `${import.meta.env.VITE_API_URL}` }) => {
+const HeroCarousel = memo(({ apiBaseUrl = import.meta.env.VITE_API_URL }) => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingSlide, setEditingSlide] = useState(null);
-  
+
   // Admin authentication from localStorage
   const [adminToken] = useLocalStorage("adminToken");
   const isAdminLoggedIn = !!adminToken;
@@ -768,54 +885,65 @@ const HeroCarousel = memo(({ apiBaseUrl = `${import.meta.env.VITE_API_URL}` }) =
 
   const handleSaveSlide = async (formData) => {
     if (!adminToken) {
-      alert('Admin authentication required');
+      alert("Admin authentication required");
       return;
     }
 
     try {
       if (editingSlide) {
-        const updatedSlide = await api.updateCarouselItem(editingSlide._id, formData, adminToken, apiBaseUrl);
-        setSlides(slides.map(slide => 
-          slide._id === editingSlide._id ? updatedSlide : slide
-        ));
+        const updatedSlide = await api.updateCarouselItem(
+          editingSlide._id,
+          formData,
+          adminToken,
+          apiBaseUrl
+        );
+        setSlides(
+          slides.map((slide) =>
+            slide._id === editingSlide._id ? updatedSlide : slide
+          )
+        );
       } else {
-        const newSlide = await api.createCarouselItem(formData, adminToken, apiBaseUrl);
+        const newSlide = await api.createCarouselItem(
+          formData,
+          adminToken,
+          apiBaseUrl
+        );
         setSlides([...slides, newSlide]);
       }
       setEditModalOpen(false);
       setEditingSlide(null);
     } catch (error) {
-      console.error('Error saving slide:', error);
-      if (error.message.includes('401')) {
-        alert('Session expired. Please login again.');
+      console.error("Error saving slide:", error);
+      if (error.message.includes("401")) {
+        alert("Session expired. Please login again.");
       } else {
-        alert('Error saving slide. Please try again.');
+        alert("Error saving slide. Please try again.");
       }
     }
   };
 
   const handleDeleteSlide = async (slide) => {
     if (!adminToken) {
-      alert('Admin authentication required');
+      alert("Admin authentication required");
       return;
     }
 
-    if (!window.confirm('Are you sure you want to delete this slide?')) return;
-    
+    if (!window.confirm("Are you sure you want to delete this slide?")) return;
+
     try {
       await api.deleteCarouselItem(slide._id, adminToken, apiBaseUrl);
-      const newSlides = slides.filter(s => s._id !== slide._id);
+      const newSlides = slides.filter((s) => s._id !== slide._id);
       setSlides(newSlides);
-      
+
       if (newSlides.length === 0) {
         fetchCarouselData();
       }
     } catch (error) {
-      console.error('Error deleting slide:', error);
-      if (error.message.includes('401')) {
-        alert('Session expired. Please login again.');
+      console.error("Error deleting slide:", error);
+      if (error.message.includes("401")) {
+        alert("Session expired. Please login again.");
       } else {
-        alert('Error deleting slide. Please try again.');
+        alert("Error deleting slide. Please try again.");
       }
     }
   };
@@ -836,9 +964,9 @@ const HeroCarousel = memo(({ apiBaseUrl = `${import.meta.env.VITE_API_URL}` }) =
     }
 
     return slides.map((slide, index) => (
-      <CarouselSlide 
-        key={slide._id || index} 
-        slide={slide} 
+      <CarouselSlide
+        key={slide._id || index}
+        slide={slide}
         index={index}
         isAdmin={isAdminLoggedIn}
         onEdit={handleEditSlide}
@@ -870,14 +998,14 @@ const HeroCarousel = memo(({ apiBaseUrl = `${import.meta.env.VITE_API_URL}` }) =
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />
 
       {/* Enhanced error notification */}
-      {error && slides.length > 0 && (
+      {/* {error && slides.length > 0 && (
         <div className="absolute top-6 left-6 bg-red-600/90 backdrop-blur-md text-white px-5 py-3 rounded-xl text-sm z-30 border border-red-400/30 shadow-xl animate-slideUp">
           <div className="flex items-center space-x-2">
             <span className="text-xl">⚠️</span>
             <span>Using cached data - API unavailable</span>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Edit Modal */}
       <EditModal
